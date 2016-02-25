@@ -83,7 +83,7 @@ int main(int argc, const char *argv[]) {
             return EXIT_SUCCESS;
         }
         if (vm.count("version")) {
-            cout << "osu2bms version 0.0.1\n" << endl;
+            cout << "osu2bms version v0.0.1-alpha" << endl;
             return EXIT_SUCCESS;
         }
         ifstream fin;
@@ -119,19 +119,7 @@ int main(int argc, const char *argv[]) {
         fin >> osuBeatmap;
         O2BConvertionOptions options;
         auto keyCount = osuBeatmap.ManiaKeyCount();
-        if (vm.count("key-map-o2mania")) {
-            options.KeyMap = GetBmsChannels(keyCount, false, true, true);
-        }
-        if (vm.count("key-map-default")) {
-            if (!options.KeyMap.empty()) {
-                throw O2BException("Key maps are in conflict.");
-            }
-            options.KeyMap = GetBmsChannels(keyCount, false, true, false);
-        }
         if (vm.count("key-map")) {
-            if (!options.KeyMap.empty()) {
-                throw O2BException("Key maps are in conflict.");
-            }
             auto &channels = vm["key-map"].as<vector<int>>();
             for (auto channel : channels) {
                 if (channel < 11 || channel > 19) {
@@ -139,6 +127,20 @@ int main(int argc, const char *argv[]) {
                 }
                 options.KeyMap.push_back(static_cast<BmsChannelId>(channel));
             }
+        }
+        if (vm.count("key-map-o2mania")) {
+            if (!options.KeyMap.empty()) {
+                throw O2BException("Key maps are in conflict.");
+            }
+            options.KeyMap = GetBmsChannels(keyCount, false, true, true);
+        }
+        if (vm.count("key-map-default")) {
+            if (!options.KeyMap.empty()) {
+                throw O2BException("Key maps are in conflict.");
+            }
+        }
+        if (options.KeyMap.empty()) {
+            options.KeyMap = GetBmsChannels(keyCount, false, true, false);
         }
         auto gridSize = vm["max-grid-size"].as<int>();
         if (gridSize <= 0 || gridSize >= 256) {
@@ -169,11 +171,14 @@ int main(int argc, const char *argv[]) {
         auto bmsBeatmap = convert(osuBeatmap);
         fout << bmsBeatmap.StringValue() << endl;
     } catch (const OsuException &e) {
-        cerr << e.Description() << endl;
+        cerr << "osu2bms: [Error] " << e.Description() << endl;
+        return EXIT_FAILURE;
     } catch (const BmsException &e) {
-        cerr << e.Description() << endl;
+        cerr << "osu2bms: [Error] " << e.Description() << endl;
+        return EXIT_FAILURE;
     } catch (const O2BException &e) {
-        cerr << e.Description() << endl;
+        cerr << "osu2bms: [Error] " << e.Description() << endl;
+        return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
