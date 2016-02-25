@@ -1,4 +1,4 @@
-# libbms
+# osu2bms
 
 > A command line tool which converts osu!mania beatmaps to BMS beatmaps.
 
