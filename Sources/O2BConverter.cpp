@@ -55,7 +55,7 @@ namespace Osu2Bms {
                 }
             }
         }
-        return move(bpms);
+        return bpms;
     }
 
     std::vector<std::string> O2BConverter::_GenerateWavs(
@@ -84,7 +84,7 @@ namespace Osu2Bms {
                 }
             }
         }
-        return move(wavs);
+        return wavs;
     }
 
     std::vector<std::string> O2BConverter::_GenerateBmps(
@@ -102,7 +102,7 @@ namespace Osu2Bms {
                 }
             }
         }
-        return move(bmps);
+        return bmps;
     }
 
     std::vector<O2BConverter::_Note> O2BConverter::_GenerateNotes(
@@ -206,7 +206,7 @@ namespace Osu2Bms {
         sort(notes.begin(), notes.end(), [](const _Note &lhs, const _Note &rhs) {
             return lhs.Time < rhs.Time;
         });
-        return move(notes);
+        return notes;
     }
 
     void O2BConverter::_ConvertTimeToPosition(
@@ -248,12 +248,11 @@ namespace Osu2Bms {
         using namespace std;
         using namespace Bms;
         BmsBeatmap bmsBeatmap;
-        auto keyCount = osuBeatmap.ManiaKeyCount();
         uint16_t section = 0;
         map<BmsChannelId, map<uint8_t, BmsReferenceId>> data;
         multimap<uint8_t, BmsReferenceId> bgmNotes;
         for (const auto &note : notes) {
-            uint16_t noteSection = floor(note.Position);
+            uint16_t noteSection = (uint16_t)floor(note.Position);
             if (noteSection != section) {
                 _PushBackSectionData(bmsBeatmap, section, data, bgmNotes);
                 data.clear();
@@ -289,7 +288,7 @@ namespace Osu2Bms {
                 bmsBeatmap.BmpMap[i + 1] = bmps[i];
             }
         }
-        return move(bmsBeatmap);
+        return bmsBeatmap;
     }
 
     void O2BConverter::_PushBackSectionData(
